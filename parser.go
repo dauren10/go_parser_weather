@@ -1,12 +1,15 @@
 // You can edit this code!
 // Click here and start typing.
 package main
-import "net/url"
-import "fmt"
-import "net/http"
-import "log"
-import "io/ioutil"
-import "encoding/xml"
+
+import (
+	"encoding/xml"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"net/url"
+)
 
 type MMWEATHER struct {
 	XMLName xml.Name `xml:"MMWEATHER"`
@@ -22,7 +25,7 @@ type MMWEATHER struct {
 			Longitude string `xml:"longitude,attr"`
 			FORECAST  []struct {
 				Text      string `xml:",chardata"`
-				Day       int `xml:"day,attr"`
+				Day       int    `xml:"day,attr"`
 				Month     string `xml:"month,attr"`
 				Year      string `xml:"year,attr"`
 				Hour      string `xml:"hour,attr"`
@@ -65,33 +68,32 @@ type MMWEATHER struct {
 			} `xml:"FORECAST"`
 		} `xml:"TOWN"`
 	} `xml:"REPORT"`
-} 
-
+}
 
 func main() {
 	resp, err := http.Get("https://xml.meteoservice.ru/export/gismeteo/point/1.xml")
-	if err!=nil{
+	if err != nil {
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
 	byteValue, err := ioutil.ReadAll(resp.Body)
-	if err!=nil{
+	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(string(byteValue))
 	var weather MMWEATHER
-	err=xml.Unmarshal(byteValue,&weather)
+	err = xml.Unmarshal(byteValue, &weather)
 
-	town:=weather.REPORT.TOWN.Sname
+	town := weather.REPORT.TOWN.Sname
 	fmt.Println(url.PathUnescape(town))
-	forecast := weather.REPORT.TOWN.FORECAST;
-	for i:=0; i<len(forecast);i++{
-		fmt.Printf("%d/%s %s:00 T.Max: %s\n", 
+	forecast := weather.REPORT.TOWN.FORECAST
+	for i := 0; i < len(forecast); i++ {
+		fmt.Printf("%d/%s %s:00 T.Max: %s\n",
 			forecast[i].Day,
 			forecast[i].Month,
 			forecast[i].Hour,
 			forecast[i].TEMPERATURE.Max,
-
 		)
 	}
+
 }
